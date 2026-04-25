@@ -9,8 +9,11 @@
 
 # ---------- 编译配置 ----------
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-BASE_DIR="${SCRIPT_DIR}/../cloud.carbonledger"
-WORK_DIR="${SCRIPT_DIR}/../packages"
+
+#编译目录
+WORK_DIR="/usr/local/carbonledger/packages"
+#安装目录
+BASE_DIR="/usr/local/carbonledger/bin"
 
 NGINX_VERSION="1.29.8"
 LUAJIT_REPO="https://github.com/openresty/luajit2.git"
@@ -88,20 +91,28 @@ echo "[+] 编译依赖安装完成"
 
 # ---------- 2. 创建工作目录 ----------
 echo "[2/15] 创建工作目录 ${WORK_DIR} ..."
-mkdir -p ${WORK_DIR}
+echo "需要root权限..."
+sudo bash <<EOF
+    mkdir -p ${WORK_DIR}
+    chmod -R 777 ${WORK_DIR}
+    rm -rf "${WORK_DIR}/*"
+    
+    mkdir -p ${BASE_DIR}
+    chmod -R 777 ${BASE_DIR}
+    rm -rf "${BASE_DIR}/*"
+    
+    mkdir -p ${LUAJIT_HOME}
+    chmod -R +w ${LUAJIT_HOME}
+    mkdir -p ${NGINX_HOME}
+    chmod -R +w ${NGINX_HOME}
+    # 创建 Vector 相关目录
+    mkdir -p ${VECTOR_HOME}
+    chmod -R +w ${VECTOR_HOME}
+    mkdir -p ${VECTOR_CONFIG_DIR} ${VECTOR_DATA_DIR} ${VECTOR_LOGS_DIR}
+    chmod -R +w ${VECTOR_CONFIG_DIR} ${VECTOR_DATA_DIR} ${VECTOR_LOGS_DIR}
+EOF
+# 进入工作目录
 cd ${WORK_DIR}
-rm -rf ./*
-mkdir -p ${BASE_DIR}
-chmod -R +w ${BASE_DIR}
-mkdir -p ${LUAJIT_HOME}
-chmod -R +w ${LUAJIT_HOME}
-mkdir -p ${NGINX_HOME}
-chmod -R +w ${NGINX_HOME}
-# 创建 Vector 相关目录
-mkdir -p ${VECTOR_HOME}
-chmod -R +w ${VECTOR_HOME}
-mkdir -p ${VECTOR_CONFIG_DIR} ${VECTOR_DATA_DIR} ${VECTOR_LOGS_DIR}
-chmod -R +w ${VECTOR_CONFIG_DIR} ${VECTOR_DATA_DIR} ${VECTOR_LOGS_DIR}
 
 # ---------- 3. 下载 zlib ----------
 echo "[3/15] 下载 zlib ..."
